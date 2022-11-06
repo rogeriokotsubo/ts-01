@@ -46,15 +46,51 @@ class EmailInput extends HTMLElement {
         shadow.appendChild(this.inputEmail);
     }
     onChange(event) {
-        const obj = new RegexValidator(this.inputEmail.value);
-        console.log(`e-mail: ${obj.data}`);
+        const objEmail = new RegexValidator(this.inputEmail.value);
+        console.log(`e-mail: ${objEmail.data}`);
+    }
+}
+class PwdInput extends HTMLElement {
+    constructor() {
+        super();
+        const shadow = this.attachShadow({ mode: 'open' });
+        this.inputPwd = document.createElement('input');
+        this.inputPwd.type = 'password';
+        this.inputPwd.onchange = (event) => this.onChange(event);
+        shadow.appendChild(this.inputPwd);
+    }
+    onChange(event) {
+        const objPwd = new RegexValidator(this.inputPwd.value);
+        console.log(`Pwd: ${objPwd.data}`);
+    }
+}
+class NameInput extends HTMLElement {
+    constructor() {
+        super();
+        const shadow = this.attachShadow({ mode: 'open' });
+        this.inputName = document.createElement('input');
+        this.inputName.onchange = (event) => this.onChange(event);
+        shadow.appendChild(this.inputName);
+    }
+    onChange(event) {
+        const objName = new RegexValidator(this.inputName.value);
+        console.log(`Name: ${objName.data}`);
     }
 }
 class RegexValidator extends StringValidator {
     constructor(data) {
         super(data);
-        const regexp = /^(\w{1,}@\w{1,}\.(\w{3})(\.\w{2}){0,1})$/gim;
-        const emailOk = regexp.test(data);
+        this._regexp = new RegExp('');
+    }
+    get regexp() {
+        return this._regexp;
+    }
+}
+class EmailValidator extends RegexValidator {
+    constructor(data) {
+        super(data);
+        this._regexp = /^(\w{1,}@\w{1,}\.(\w{3})(\.\w{2}){0,1})$/gim;
+        const emailOk = this.regexp.test(data);
         if (emailOk === true) {
             console.log(`O e-mail ${data} é válido.`);
         }
@@ -63,4 +99,32 @@ class RegexValidator extends StringValidator {
         }
     }
 }
+class PwdValidator extends RegexValidator {
+    constructor(data) {
+        super(data);
+        this._regexp = /^\w{1,}$/gim;
+        const pwdOk = this.regexp.test(data);
+        if (pwdOk === true) {
+            console.log(`A senha ${data} é válida.`);
+        }
+        else {
+            throw new Error('A senha não é válida');
+        }
+    }
+}
+class NameValidator extends RegexValidator {
+    constructor(data) {
+        super(data);
+        this._regexp = /^([a-z]{1,})([ ]{1}[a-z]{1,}){0,}$/gim;
+        const nameOk = this.regexp.test(data);
+        if (nameOk === true) {
+            console.log(`O nome ${data} é válido.`);
+        }
+        else {
+            throw new Error('o Nome não é válido');
+        }
+    }
+}
 customElements.define('input-email', EmailInput);
+customElements.define('input-pwd', PwdInput);
+customElements.define('input-name', NameInput);
