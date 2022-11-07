@@ -46,7 +46,7 @@ class EmailInput extends HTMLElement {
         shadow.appendChild(this.inputEmail);
     }
     onChange(event) {
-        const objEmail = new RegexValidator(this.inputEmail.value);
+        const objEmail = new EmailValidator(this.inputEmail.value);
         console.log(`e-mail: ${objEmail.data}`);
     }
 }
@@ -60,7 +60,7 @@ class PwdInput extends HTMLElement {
         shadow.appendChild(this.inputPwd);
     }
     onChange(event) {
-        const objPwd = new RegexValidator(this.inputPwd.value);
+        const objPwd = new PwdValidator(this.inputPwd.value);
         console.log(`Pwd: ${objPwd.data}`);
     }
 }
@@ -73,7 +73,7 @@ class NameInput extends HTMLElement {
         shadow.appendChild(this.inputName);
     }
     onChange(event) {
-        const objName = new RegexValidator(this.inputName.value);
+        const objName = new NameValidator(this.inputName.value);
         console.log(`Name: ${objName.data}`);
     }
 }
