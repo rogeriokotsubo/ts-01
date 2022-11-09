@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 class Validator {
     constructor(data) {
         this.data = data;
@@ -46,8 +55,13 @@ class EmailInput extends HTMLElement {
         shadow.appendChild(this.inputEmail);
     }
     onChange(event) {
-        const objEmail = new EmailValidator(this.inputEmail.value);
-        console.log(`e-mail: ${objEmail.data}`);
+        try {
+            const objEmail = new EmailValidator(this.inputEmail.value);
+            console.log(`e-mail: ${objEmail.data}`);
+        }
+        catch (e) {
+            this.inputEmail.value = '';
+        }
     }
 }
 class PwdInput extends HTMLElement {
@@ -60,8 +74,13 @@ class PwdInput extends HTMLElement {
         shadow.appendChild(this.inputPwd);
     }
     onChange(event) {
-        const objPwd = new PwdValidator(this.inputPwd.value);
-        console.log(`Pwd: ${objPwd.data}`);
+        try {
+            const objPwd = new PwdValidator(this.inputPwd.value);
+            console.log(`Pwd: ${objPwd.data}`);
+        }
+        catch (e) {
+            this.inputPwd.value = '';
+        }
     }
 }
 class NameInput extends HTMLElement {
@@ -73,8 +92,13 @@ class NameInput extends HTMLElement {
         shadow.appendChild(this.inputName);
     }
     onChange(event) {
-        const objName = new NameValidator(this.inputName.value);
-        console.log(`Name: ${objName.data}`);
+        try {
+            const objName = new NameValidator(this.inputName.value);
+            console.log(`Name: ${objName.data}`);
+        }
+        catch (e) {
+            this.inputName.value = '';
+        }
     }
 }
 class RegexValidator extends StringValidator {
@@ -125,6 +149,102 @@ class NameValidator extends RegexValidator {
         }
     }
 }
+class UserForm extends HTMLElement {
+    constructor() {
+        super();
+        const shadow = this.attachShadow({ mode: 'open' });
+        this.form = document.createElement("form");
+        this.emailField = new EmailInput();
+        this.emailField.inputEmail.required = true;
+        this.emailField.inputEmail.placeholder = "Email";
+        this.userNameField = new NameInput();
+        this.userNameField.inputName.required = true;
+        this.userNameField.inputName.placeholder = "Name";
+        this.pwdField = new PwdInput();
+        this.pwdField.inputPwd.required = true;
+        this.pwdField.inputPwd.placeholder = "Password";
+        const createStore = document.createElement("button");
+        createStore.innerText = "Cadastrar";
+        createStore.type = "button";
+        createStore.onclick = () => this.onCreate();
+        const createLogin = document.createElement("button");
+        createLogin.innerText = "Login";
+        createLogin.type = "button";
+        createLogin.onclick = () => this.onLogin();
+        const createUpdate = document.createElement("button");
+        createUpdate.innerText = "Login";
+        createUpdate.type = "button";
+        createUpdate.onclick = () => this.onUpdate();
+        shadow.appendChild(this.form);
+    }
+    onCreate() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.emailField.inputEmail.value)
+                return;
+            if (!this.userNameField.inputName.value)
+                return;
+            if (!this.pwdField.inputPwd.value)
+                return;
+            const userData = {
+                email: this.emailField.inputEmail.value,
+                name: this.userNameField.inputName.value,
+                password: this.pwdField.inputPwd.value
+            };
+            const response = yield fetch('http://localhost:8000/accounts', {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            }).then(resp => resp.json());
+        });
+    }
+    onLogin() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.emailField.inputEmail.value)
+                return;
+            if (!this.userNameField.inputName.value)
+                return;
+            if (!this.pwdField.inputPwd.value)
+                return;
+            const userData = {
+                email: this.emailField.inputEmail.value,
+                name: this.userNameField.inputName.value,
+                password: ""
+            };
+            const response = yield fetch('http://localhost:8000/accounts/login', {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            }).then(resp => resp.json());
+        });
+    }
+    onUpdate() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.emailField.inputEmail.value)
+                return;
+            if (!this.userNameField.inputName.value)
+                return;
+            if (!this.pwdField.inputPwd.value)
+                return;
+            const userData = {
+                email: this.emailField.inputEmail.value,
+                name: this.userNameField.inputName.value,
+                password: this.pwdField.inputPwd.value
+            };
+            const response = yield fetch('http://localhost:8000/accounts', {
+                method: "PATCH",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            }).then(resp => resp.json());
+        });
+    }
+}
 customElements.define('input-email', EmailInput);
-customElements.define('input-pwd', PwdInput);
 customElements.define('input-name', NameInput);
+customElements.define('input-pwd', PwdInput);
+customElements.define('user-form', UserForm);

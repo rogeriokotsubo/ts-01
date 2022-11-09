@@ -1,3 +1,24 @@
+interface APIResponse<T>{
+    data : T,
+    message : Array<string>
+}
+
+interface UserData {
+    id: string;
+    email: string;
+    name: string
+}
+
+interface LoginData {
+    id: string
+}
+
+interface UserBody {
+    email: string;
+    name: string;
+    password: string
+}
+
 
 class Validator {
     data: string | number | boolean | undefined | null | void;
@@ -40,6 +61,7 @@ class BooleanValidator extends Validator {
     }
 }
 
+
 class EmailInput extends HTMLElement {
     inputEmail: HTMLInputElement;
     constructor() {
@@ -51,9 +73,12 @@ class EmailInput extends HTMLElement {
     }
 
     onChange(event: Event) {
-
-        const objEmail = new EmailValidator(this.inputEmail.value);
-        console.log(`e-mail: ${objEmail.data}`);
+        try {
+            const objEmail = new EmailValidator(this.inputEmail.value);
+            console.log(`e-mail: ${objEmail.data}`);
+        } catch (e) {
+            this.inputEmail.value = '';
+        }    
     }
 }
 
@@ -69,9 +94,12 @@ class PwdInput extends HTMLElement {
     }
 
     onChange(event: Event) {
-
-        const objPwd = new PwdValidator(this.inputPwd.value);
-        console.log(`Pwd: ${objPwd.data}`);
+        try{
+            const objPwd = new PwdValidator(this.inputPwd.value);
+            console.log(`Pwd: ${objPwd.data}`);
+        }catch(e){
+            this.inputPwd.value='';
+        }    
     }
 }
 
@@ -87,8 +115,12 @@ class NameInput extends HTMLElement {
 
     onChange(event: Event) {
 
-        const objName = new NameValidator(this.inputName.value);
-        console.log(`Name: ${objName.data}`);
+        try {
+            const objName = new NameValidator(this.inputName.value);
+            console.log(`Name: ${objName.data}`);
+        }catch (e) {
+            this.inputName.value='';
+        }
     }
 }
 
@@ -146,6 +178,116 @@ class NameValidator extends RegexValidator {
     }
 }
 
-customElements.define('input-email', EmailInput);
-customElements.define('input-pwd', PwdInput);
-customElements.define('input-name', NameInput);
+
+class UserForm extends HTMLElement{
+    form : HTMLFormElement;
+    userNameField : NameInput;
+    emailField : EmailInput;
+    pwdField : PwdInput;
+    
+    constructor(){
+        super();
+        const shadow = this.attachShadow({ mode: 'open' }); 
+        this.form = document.createElement("form");
+
+        this.emailField = new EmailInput();
+        this.emailField.inputEmail.required = true;
+        this.emailField.inputEmail.placeholder = "Email";
+
+        this.userNameField = new NameInput();
+        this.userNameField.inputName.required = true;
+        this.userNameField.inputName.placeholder = "Name";
+
+        this.pwdField = new PwdInput();
+        this.pwdField.inputPwd.required = true;
+        this.pwdField.inputPwd.placeholder = "Password";
+
+        const createStore = document.createElement("button");
+        createStore.innerText = "Cadastrar";
+        createStore.type = "button";
+        createStore.onclick = () => this.onCreate(); 
+
+        const createLogin = document.createElement("button");
+        createLogin.innerText = "Login";
+        createLogin.type = "button";
+        createLogin.onclick = () => this.onLogin();         
+
+        const createUpdate = document.createElement("button");
+        createUpdate.innerText = "Login";
+        createUpdate.type = "button";
+        createUpdate.onclick = () => this.onUpdate();  
+        shadow.appendChild(this.form);
+    }
+
+    async onCreate(){
+        if (!this.emailField.inputEmail.value) return;
+        if (!this.userNameField.inputName.value) return;
+        if (!this.pwdField.inputPwd.value) return;
+
+        const userData : UserBody = {
+            email: this.emailField.inputEmail.value,
+            name : this.userNameField.inputName.value,
+            password : this.pwdField.inputPwd.value
+        }
+
+        const response : APIResponse<UserData> = await fetch('http://localhost:8000/accounts',{
+            method: "POST",
+            headers: 
+            { 
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        }).then(resp => resp.json());
+    }
+
+    async onLogin(){
+        if (!this.emailField.inputEmail.value) return;
+        if (!this.userNameField.inputName.value) return;
+        if (!this.pwdField.inputPwd.value) return;
+
+        const userData : UserBody = {
+            email: this.emailField.inputEmail.value,
+            name : this.userNameField.inputName.value,
+            password : ""
+        }
+
+        const response : APIResponse<LoginData> = await fetch('http://localhost:8000/accounts/login',{
+            method: "POST",
+            headers: 
+            { 
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        }).then(resp => resp.json());
+    }    
+
+    async onUpdate(){
+        if (!this.emailField.inputEmail.value) return;
+        if (!this.userNameField.inputName.value) return;
+        if (!this.pwdField.inputPwd.value) return;
+
+        const userData : UserBody = {
+            email: this.emailField.inputEmail.value,
+            name : this.userNameField.inputName.value,
+            password : this.pwdField.inputPwd.value
+        }
+
+        const response : APIResponse<UserData> = await fetch('http://localhost:8000/accounts',{
+            method: "PATCH",
+            headers: 
+            { 
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        }).then(resp => resp.json());
+    }    
+   
+}
+
+customElements.define('input-email',EmailInput);
+customElements.define('input-name',NameInput);
+customElements.define('input-pwd',PwdInput);
+
+customElements.define('user-form', UserForm);
+
+
